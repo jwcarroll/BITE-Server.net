@@ -1,0 +1,89 @@
+﻿@{
+    ViewBag.Title = "Overview";
+}
+@section AdditionalStyles
+{
+   <style>
+      .actionColumn {
+          width: 100px;
+         text-align: left;
+      }
+   </style>
+}
+
+<div class="row">
+   <div class="span12">
+      <table class="table table-striped">
+         <thead>
+            <tr>
+               <th>Method</th>
+               <th>Url</th>
+               <th>Adapter Name</th>
+               <th>Type</th>
+               <th>Method Invoked</th>
+               <th>Request Arguments</th>
+               <th>Passed Arguments</th>
+               <th>Return Data</th>
+            </tr>  
+         </thead>
+         <tbody data-bind="foreach: {data: requests, afterAdd: transitionShowElement, beforeRemove: transitionHideElement}">
+            <tr style="display: none">
+               <td data-bind="text: Method"></td>
+               <td data-bind="text: RequestUrl"></td>
+               <td data-bind="text: AdapterName"></td>
+               <td data-bind="text: AdapterType"></td>
+               <td data-bind="text: MethodInvoked"></td>
+               <td data-bind="text: RequestArgs"></td>
+               <td data-bind="text: PassedArgs"></td>
+               <td data-bind="text: ReturnData"></td>
+            </tr>
+         </tbody>
+      </table>
+   </div>
+</div>
+
+@section AdditionalScript
+{
+   <script src="@Url.Content("~/signalr/hubs")" type="text/javascript"></script>
+   <script type="text/javascript">
+      $(function () {
+
+         // Proxy created on the fly
+         var biteRequestHub = $.connection.biteRequestHub;
+
+         function pageViewModel() {
+            var self = this;
+
+            self.requests = ko.observableArray([]);
+
+            self.addRequest = function (item) {
+               self.requests.push(item);
+            };
+
+            self.transitionShowElement = function (elem) {
+               if (elem.nodeType === 1) $(elem).show(300);
+            };
+             
+            self.transitionHideElement = function (elem) {
+               if (elem.nodeType === 1) {
+                  $(elem).hide(2000, function () {
+                     $(elem).remove();
+                  });
+               }
+            };
+         }
+
+         var _pageViewModel = new pageViewModel();
+         
+         // Declare a function on the chat hub so the server can invoke it
+         biteRequestHub.publishRequestMade = function (newRequest) {
+            _pageViewModel.addRequest(newRequest);
+         };
+
+         ko.applyBindings(_pageViewModel);
+
+         // Start the connection
+         $.connection.hub.start(function () { });
+      });
+   </script>
+}
