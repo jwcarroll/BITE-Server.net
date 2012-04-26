@@ -24,7 +24,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{8557E5
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExampleAdapters", "MyBiteAdapters\ExampleAdapters.csproj", "{FFF1C321-091A-419A-B08C-2C9801DF50B5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExampleAdapters", "ExampleAdapters\ExampleAdapters.csproj", "{FFF1C321-091A-419A-B08C-2C9801DF50B5}"
 EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
