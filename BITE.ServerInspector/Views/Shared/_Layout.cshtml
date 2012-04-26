@@ -1,0 +1,89 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>BITE Inspector</title>
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    
+    @MvcHtmlString.Create(
+      Bundle.Css()
+          .Add("~/Content/bootstrap.css")
+          .Add("~/Content/bootstrap-responsive.css")
+          .Render("~/Content/combined_#.css"))
+   
+   @RenderSection("AdditionalStyles", false)
+   
+    <style type="text/css">
+      body {
+        padding-top: 60px;
+         padding-bottom: 40px;
+      }
+    </style>
+
+  </head>
+
+   <body>
+
+      <div class="navbar navbar-fixed-top">
+         <div class="navbar-inner">
+            <div class="container">
+               <a class="brand" href="@Url.Action("Index", "Inspector")">Message Monkey Dashboard</a>
+               <div class="nav-collapse">
+                  <ul class="nav">
+                     @Html.NavigationListItem("Home", "Index", "Inspector")
+                  </ul>
+               </div>
+            </div>
+         </div>
+      </div>
+
+      <div class="container">
+
+         @RenderBody()
+         
+         <hr/>
+
+         <footer>
+            <p>&copy; PerfectServe @DateTime.Now.Year</p>
+         </footer>
+
+      </div> <!-- /container -->
+
+    @MvcHtmlString.Create(
+      Bundle.JavaScript()
+          .Add("~/Scripts/jquery-1.7.1.js")
+          .Add("~/Scripts/jquery-ui-1.8.17.js")
+          .Add("~/Scripts/jquery.unobtrusive-ajax.js")
+          .Add("~/Scripts/jquery.validate.js")
+          .Add("~/Scripts/jquery.validate.unobtrusive.js")
+          .Add("~/Scripts/modernizr-2.0.6-development-only.js")
+          .Add("~/Scripts/knockout-2.0.0.debug.js")
+          .Add("~/Scripts/jquery.signalR.js")
+          .Add("~/Scripts/underscore.js")
+          .Render("~/Scripts/core-combined_#.js"))
+                
+    @MvcHtmlString.Create(
+      Bundle.JavaScript()
+          .Add("~/Scripts/bootstrap-alerts.js")
+          .Add("~/Scripts/bootstrap-buttons.js")
+          .Add("~/Scripts/bootstrap-dropdown.js")
+          .Add("~/Scripts/bootstrap-modal.js")
+          .Add("~/Scripts/bootstrap-twipsy.js")
+          .Add("~/Scripts/bootstrap-popover.js")
+          .Add("~/Scripts/bootstrap-scrollspy.js")
+          .Add("~/Scripts/bootstrap-tabs.js")
+          .Render("~/Scripts/bootstrap-combined_#.js"))
+          
+    @RenderSection("AdditionalScript", false)
+    
+   </body>
+   
+</html>
