@@ -1,8 +1,10 @@
 ﻿namespace ExampleAdapters.Adapters {
    public class StorageAdapter {
       public object getprojectnames() {
-         return new {
-            names = "Web API,WUI,Web Contact"
+         return new string [] {
+            "Mapping Application",
+            "Survey",
+            "Internal Project X"
          };
       }
    }
