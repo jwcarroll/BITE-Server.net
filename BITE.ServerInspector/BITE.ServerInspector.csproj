@@ -264,6 +264,10 @@
       <Project>{8007E6F2-DF99-4BF5-81EB-8319914FB793}</Project>
       <Name>BITE.Server</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ExampleAdapters\ExampleAdapters.csproj">
+      <Project>{FFF1C321-091A-419A-B08C-2C9801DF50B5}</Project>
+      <Name>ExampleAdapters</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" />

@@ -15,17 +15,17 @@ namespace ExampleAdapters.Adapters {
       [BiteMethod("get_templates")]
       public object get_templates() {
          return new List<BugTemplate> {
-            new BugTemplate {
-               id = "CDB28DF69278448AA3E2590217C984F0",
-               name = "Default Template",
-               urls = new List<string>(),
-               project = "WUI",
-               backendProject = "WUI",
-               backendProvider = "MyFakeProvider",
-               selectorText = "Bug",
-               noteText = "It's a bug yo!",
-               displayOrder = 1
-            }
+            //new BugTemplate {
+            //   id = "CDB28DF69278448AA3E2590217C984F0",
+            //   name = "Default Template",
+            //   urls = new List<string>(),
+            //   project = "WUI",
+            //   backendProject = "WUI",
+            //   backendProvider = "MyFakeProvider",
+            //   selectorText = "Bug",
+            //   noteText = "It's a bug yo!",
+            //   displayOrder = 0
+            //}
          };
       }
    }
