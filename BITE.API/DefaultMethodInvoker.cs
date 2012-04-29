@@ -106,6 +106,7 @@ namespace BITE.Server.Plugins
             return convertedProperties.ToArray();
         }
 
+        // FROM: http://stackoverflow.com/questions/5306018/how-to-call-dynamicobject-trygetmember-directly
         private static object GetDynamicMember(object obj, string memberName)
         {
             var binder = Microsoft.CSharp.RuntimeBinder.Binder.GetMember(CSharpBinderFlags.None, memberName, obj.GetType(),
