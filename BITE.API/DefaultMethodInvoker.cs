@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Web;
 using BITE.Server.Plugins.Interfaces;
@@ -10,6 +12,9 @@ using System.Reflection;
 using System.Web.Routing;
 using System.IO;
 using BITE.Server.Plugins.Exceptions;
+using System.Web.Helpers;
+using Microsoft.CSharp.RuntimeBinder;
+using Binder = System.Reflection.Binder;
 
 namespace BITE.Server.Plugins
 {
@@ -66,6 +71,13 @@ namespace BITE.Server.Plugins
             if (args.Length == 0 && parameterInfo.Length == 0) return null;
 
             var argsList = new List<Object>(args);
+
+            // Check for special case of a single JSON object
+            if (argsList.Count == 1 && argsList[0] is DynamicJsonObject)
+            {
+                argsList = new List<object>(ConvertDynamicJsonObjectToArgumentArray((DynamicJsonObject)argsList[0]));
+            }
+
             var convertedArgs = new List<Object>();
 
             foreach (var paramInfo in parameterInfo)
@@ -78,6 +90,29 @@ namespace BITE.Server.Plugins
             }
 
             return convertedArgs.ToArray();
+        }
+
+        private object[] ConvertDynamicJsonObjectToArgumentArray(DynamicJsonObject jsonObject)
+        {
+            var convertedProperties = new List<object>();
+
+            var dynamicMemberNames = jsonObject.GetDynamicMemberNames();
+            foreach (var dynamicMemberName in dynamicMemberNames)
+            {
+                object tempObject = GetDynamicMember(jsonObject, dynamicMemberName);
+                convertedProperties.Add(new QueryStringParam(dynamicMemberName, tempObject.ToString()));
+            }
+
+            return convertedProperties.ToArray();
+        }
+
+        // FROM: http://stackoverflow.com/questions/5306018/how-to-call-dynamicobject-trygetmember-directly
+        private static object GetDynamicMember(object obj, string memberName)
+        {
+            var binder = Microsoft.CSharp.RuntimeBinder.Binder.GetMember(CSharpBinderFlags.None, memberName, obj.GetType(),
+                new[] { CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null) });
+            var callsite = CallSite<Func<CallSite, object, object>>.Create(binder);
+            return callsite.Target(callsite, obj);
         }
 
         private object ConvertArg(object arg, ParameterInfo paramInfo)
