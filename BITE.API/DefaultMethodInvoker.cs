@@ -92,7 +92,7 @@ namespace BITE.Server.Plugins
             return convertedArgs.ToArray();
         }
 
-        private object[] ConvertDynamicJsonObjectToArgumentArray(DynamicJsonObject jsonObject)
+        private IEnumerable<object> ConvertDynamicJsonObjectToArgumentArray(DynamicJsonObject jsonObject)
         {
             var convertedProperties = new List<object>();
 
@@ -100,7 +100,7 @@ namespace BITE.Server.Plugins
             foreach (var dynamicMemberName in dynamicMemberNames)
             {
                 object tempObject = GetDynamicMember(jsonObject, dynamicMemberName);
-                convertedProperties.Add(new QueryStringParam(dynamicMemberName, tempObject.ToString()));
+                convertedProperties.Add(new StringParameter(dynamicMemberName, tempObject.ToString()));
             }
 
             return convertedProperties.ToArray();
@@ -138,7 +138,7 @@ namespace BITE.Server.Plugins
         {
             Object argToReturn = null;
 
-            var findByName = argsList.Where(a => a is QueryStringParam).Cast<QueryStringParam>()
+            var findByName = argsList.Where(a => a is StringParameter).Cast<StringParameter>()
                 .Where(a => String.Equals(a.Name, paramInfo.Name, StringComparison.OrdinalIgnoreCase))
                 .Select(qsp => qsp.Value).FirstOrDefault();
 
@@ -187,7 +187,7 @@ namespace BITE.Server.Plugins
 
             for (var i = 0; i < query.Count; i++ )
             {
-                yield return new QueryStringParam(query.Keys[i], query.Get(i));
+                yield return new StringParameter(query.Keys[i], query.Get(i));
             }
         }
 
@@ -234,9 +234,9 @@ namespace BITE.Server.Plugins
             return suitableMethods[0].adapterMethod;
         }
 
-        class QueryStringParam
+        class StringParameter
         {
-            public QueryStringParam(string name, string value)
+            public StringParameter(string name, string value)
             {
                 Name = name;
                 Value = value;
