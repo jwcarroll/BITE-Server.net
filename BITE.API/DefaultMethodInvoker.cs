@@ -166,7 +166,15 @@ namespace BITE.Server.Plugins
 
             if (!IsGetRequest(request))
             {
-                argsList.Add(Formatter.FormatRequest(request.HttpContext.Request));
+                if (IsFormEncodedRequest(request))
+                {
+                    argsList.AddRange(ExtractFormValues(request));
+                }
+                else
+                {
+                    argsList.Add(Formatter.FormatRequest(request.HttpContext.Request));    
+                }
+                
             }
             else if (ContainsQueryString(request))
             {
@@ -174,6 +182,21 @@ namespace BITE.Server.Plugins
             }
             
             return argsList.ToArray();
+        }
+
+        private IEnumerable<object> ExtractFormValues(RequestContext request)
+        {
+            var form = request.HttpContext.Request.Form;
+
+            for (var i = 0; i < form.Count; i++)
+            {
+                yield return new StringParameter(form.Keys[i], form.Get(i));
+            }
+        }
+
+        private static bool IsFormEncodedRequest(RequestContext request)
+        {
+            return request.HttpContext.Request.ContentType.StartsWith("application/x-www-form-urlencoded");
         }
 
         private bool ContainsQueryString(RequestContext request)
