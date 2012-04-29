@@ -5,7 +5,10 @@ namespace ExampleAdapters.Adapters {
    public class BugsAdapter {
        public object Post(Object title)
        {
-           return null;
+           return new {
+                          kind = "bugs#id",
+                          id = 1234
+                      };
        }
 
       public object PostUrls(Object bugRequest) {
