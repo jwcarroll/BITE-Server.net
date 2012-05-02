@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Web;
 using BITE.Server.Plugins.Interfaces;
@@ -10,6 +12,9 @@ using System.Reflection;
 using System.Web.Routing;
 using System.IO;
 using BITE.Server.Plugins.Exceptions;
+using System.Web.Helpers;
+using Microsoft.CSharp.RuntimeBinder;
+using Binder = System.Reflection.Binder;
 
 namespace BITE.Server.Plugins
 {
@@ -66,6 +71,13 @@ namespace BITE.Server.Plugins
             if (args.Length == 0 && parameterInfo.Length == 0) return null;
 
             var argsList = new List<Object>(args);
+
+            // Check for special case of a single JSON object
+            if (argsList.Count == 1 && argsList[0] is DynamicJsonObject)
+            {
+                argsList = new List<object>(ConvertDynamicJsonObjectToArgumentArray((DynamicJsonObject)argsList[0]));
+            }
+
             var convertedArgs = new List<Object>();
 
             foreach (var paramInfo in parameterInfo)
@@ -78,6 +90,29 @@ namespace BITE.Server.Plugins
             }
 
             return convertedArgs.ToArray();
+        }
+
+        private IEnumerable<object> ConvertDynamicJsonObjectToArgumentArray(DynamicJsonObject jsonObject)
+        {
+            var convertedProperties = new List<object>();
+
+            var dynamicMemberNames = jsonObject.GetDynamicMemberNames();
+            foreach (var dynamicMemberName in dynamicMemberNames)
+            {
+                object tempObject = GetDynamicMember(jsonObject, dynamicMemberName);
+                convertedProperties.Add(new StringParameter(dynamicMemberName, tempObject.ToString()));
+            }
+
+            return convertedProperties.ToArray();
+        }
+
+        // FROM: http://stackoverflow.com/questions/5306018/how-to-call-dynamicobject-trygetmember-directly
+        private static object GetDynamicMember(object obj, string memberName)
+        {
+            var binder = Microsoft.CSharp.RuntimeBinder.Binder.GetMember(CSharpBinderFlags.None, memberName, obj.GetType(),
+                new[] { CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null) });
+            var callsite = CallSite<Func<CallSite, object, object>>.Create(binder);
+            return callsite.Target(callsite, obj);
         }
 
         private object ConvertArg(object arg, ParameterInfo paramInfo)
@@ -103,7 +138,7 @@ namespace BITE.Server.Plugins
         {
             Object argToReturn = null;
 
-            var findByName = argsList.Where(a => a is QueryStringParam).Cast<QueryStringParam>()
+            var findByName = argsList.Where(a => a is StringParameter).Cast<StringParameter>()
                 .Where(a => String.Equals(a.Name, paramInfo.Name, StringComparison.OrdinalIgnoreCase))
                 .Select(qsp => qsp.Value).FirstOrDefault();
 
@@ -131,7 +166,15 @@ namespace BITE.Server.Plugins
 
             if (!IsGetRequest(request))
             {
-                argsList.Add(Formatter.FormatRequest(request.HttpContext.Request));
+                if (IsFormEncodedRequest(request))
+                {
+                    argsList.AddRange(ExtractFormValues(request));
+                }
+                else
+                {
+                    argsList.Add(Formatter.FormatRequest(request.HttpContext.Request));    
+                }
+                
             }
             else if (ContainsQueryString(request))
             {
@@ -139,6 +182,21 @@ namespace BITE.Server.Plugins
             }
             
             return argsList.ToArray();
+        }
+
+        private IEnumerable<object> ExtractFormValues(RequestContext request)
+        {
+            var form = request.HttpContext.Request.Form;
+
+            for (var i = 0; i < form.Count; i++)
+            {
+                yield return new StringParameter(form.Keys[i], form.Get(i));
+            }
+        }
+
+        private static bool IsFormEncodedRequest(RequestContext request)
+        {
+            return request.HttpContext.Request.ContentType.StartsWith("application/x-www-form-urlencoded");
         }
 
         private bool ContainsQueryString(RequestContext request)
@@ -152,7 +210,7 @@ namespace BITE.Server.Plugins
 
             for (var i = 0; i < query.Count; i++ )
             {
-                yield return new QueryStringParam(query.Keys[i], query.Get(i));
+                yield return new StringParameter(query.Keys[i], query.Get(i));
             }
         }
 
@@ -199,9 +257,9 @@ namespace BITE.Server.Plugins
             return suitableMethods[0].adapterMethod;
         }
 
-        class QueryStringParam
+        class StringParameter
         {
-            public QueryStringParam(string name, string value)
+            public StringParameter(string name, string value)
             {
                 Name = name;
                 Value = value;
